@@ -1,0 +1,138 @@
+#lang racket
+(define (lon-take lon num acc)
+  (cond
+    [(empty? lon) acc]
+    [(= num (first lon)) (lon-take (rest lon) num (add1 acc))]
+    [else (lon-take (rest lon) num acc)]))
+
+
+(define (lon-element-find lon)
+  (cond
+    [(= 1 (length lon)) (first lon)]
+    [(= (lon-take lon (first lon) 0) 2)
+     (lon-element-find (filter (lambda (x) (not (= x (first lon)))) lon))]
+    [else (first lon)]))
+(lon-element-find '(1 1 2 3 2 3 7 7 5 5 666 666 8 9 9))
+
+
+(define (n-distinct lon)
+  (- (first (reverse (foldl (lambda (x y)
+                              (cond
+                                [(= (- x 1) (first y)) (cons x y)]
+                                [else (list x)]))
+                            (list 0) (rest lon)))) 1))
+(n-distinct '(0 1 2 3 5 6 7 8))
+
+
+(define (sort-rwb lon l1 l2 l3)
+  (cond
+    [(empty? lon) (append l1 l2 l3)]
+    [(= (first lon) 0) (sort-rwb (rest lon) (cons (first lon) l1) l2 l3)]
+    [(= (first lon) 1) (sort-rwb (rest lon) l1 (cons (first lon) l2) l3)]
+    [else (sort-rwb (rest lon) l1 l2 (cons (first lon) l3))]))
+(sort-rwb '(1 2 0 1 2 0 1 2 1 2 2 0 0 0 1 1 2 1 2 0 1 0 2) empty empty empty)
+
+
+(define (str-numeric? str)
+  (local
+    [(define loc-s (string->list str))
+     (define (numeric? loc bool)
+       (cond
+         [(empty? loc) bool]
+         [(char-numeric? (first loc)) (numeric? (rest loc) true)]
+         [(and bool
+               (and (or (char=? (first loc) #\e) (char=? (first loc) #\space))
+                    (numeric? (rest loc) false))) bool]
+         [else (numeric? (rest loc) false)]))]
+    (numeric? loc-s false)))
+(str-numeric? "2e10")
+(str-numeric? "1 a")
+
+
+(define (reorder-lst lst)
+  (cond
+    [(empty? lst) empty]
+    [(empty? (rest lst)) (list (first lst))]
+    [else (append (list (first lst) (first (reverse lst)))
+                  (reorder-lst (reverse (rest (reverse (rest lst))))))]))
+(reorder-lst '(1 2 3 4 5 6 ))
+
+
+(define (subseq? loS loT bool)
+  (cond
+    [(or (empty? loS) (empty? loT)) bool]
+    [(not (member (first loT) loS)) false]
+    [(and (not (char=? (first loT) (first loS)))
+          (member (first loS) (rest loT))) false]
+    [else (subseq? (rest loS) (rest loT) true)]))
+(subseq? (string->list "rabbbit") (string->list "rabbit") false)
+
+
+(define (subseq-letter? s1 s2)
+  (local
+    [(define loc1 (string->list s1))
+     (define loc2 (string->list s2))
+     (define (sibseq? loc1 loc2)
+       (cond 
+         [(empty? s1) false]
+         [(member (first loc1) loc2) true]
+         [else (subseq? (rest loc1) loc2)]))
+     (define (yes-or-no loca locb)
+       (cond 
+         [(subseq? loca locb) "YES"]
+         [else "NO"]))]
+    (yes-or-no loc1 loc2)))
+
+
+(define (find-num-kpairs lst k)
+  (local
+    [(define (k-sut? num1 num2 k)
+       (= k (abs (- num1 num2))))
+     (define (k-compare num lst acc k)
+       (cond
+         ((empty? lst) acc)
+         [(k-sut? num (first lst) k) (k-compare num (rest lst) (add1 acc) k)]
+         [else (k-compare num (rest lst) acc k)]))
+     (define (ans-gen lst k)
+       (cond
+         [(or (empty? lst) (empty? (rest lst))) 0]
+         [else (+ (k-compare (first lst) (rest lst) 0 k)
+                  (ans-gen (rest lst) k))]))]
+    (ans-gen lst k)))
+(find-num-kpairs '(1 23 4 3 3 2 3 8 9) 3)
+
+
+(define (sub-count S T)
+  (local
+    [(define newS-loc (filter (lambda (char)
+                                (member char (string->list T)))
+                              (string->list S)))]
+    (newS-loc)))
+;(define (count-ocurences locS locT acc)
+
+
+;SUPPER UGLY NUMBER
+(define (factors num)
+  (local
+    [(define start-num num)
+     (define (factor num)
+       (cond
+         [(or (zero? num)) empty]
+         [(zero? (remainder start-num num)) (append (list num)
+                                                    (factors (sub1 num)))]
+         [else (factors (sub1 num))]))]
+    (factor num)))
+
+
+(define (prime? num)
+  (= 1 (length (factors num))))
+
+
+(define (sup-u-num lst)
+  (cond
+    [(empty? lst) empty]
+    [(or (= 1 (first lst)) (prime? (first lst))) (append
+                                                  (list (first lst))
+                                                  (sup-u-num (rest lst)))]
+    [else (sup-u-num (rest lst))]))
+(sup-u-num '(1 2 4 7 8 13 14 16 19 26 28 32))
