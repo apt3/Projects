@@ -1,0 +1,41 @@
+#include<stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <rpcndr.h>
+
+
+int factor(int value) {
+    int i = 2;
+
+    while (i <= value) {
+        if (value%i != 0)
+            i++;
+        else return 1;
+    }
+
+    return 0;
+}
+
+int main(void) {
+    int c;
+    int value = 1;
+
+    printf("Press enter to get the next prime number.");
+    while(value >= 1) {
+        c = getchar();
+
+        if (c == '\n') {
+            while (factor(value))
+            {
+                value++;
+            }
+
+            printf("%d", value);
+            value++;
+        }
+
+        else break;
+    }
+
+    return 0;
+}
